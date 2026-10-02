@@ -1,0 +1,11 @@
+{
+  "app": {
+    "name": "SalesOS",
+    "welcome": "مرحباً بك في SalesOS",
+    "foundation": "المنصة الأساسية جاهزة للبناء"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "settings": "الإعدادات"
+  }
+}
