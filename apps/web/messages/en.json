@@ -1,0 +1,11 @@
+{
+  "app": {
+    "name": "SalesOS",
+    "welcome": "Welcome to SalesOS",
+    "foundation": "The foundation is ready to build on"
+  },
+  "nav": {
+    "home": "Home",
+    "settings": "Settings"
+  }
+}
