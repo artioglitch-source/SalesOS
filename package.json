@@ -1,0 +1,13 @@
+{
+  "name": "salesos",
+  "private": true,
+  "packageManager": "pnpm@10.12.4",
+  "scripts": {
+    "dev": "pnpm --filter @salesos/web dev",
+    "build": "pnpm --filter @salesos/web build",
+    "lint": "pnpm --filter @salesos/web lint",
+    "typecheck": "pnpm --filter @salesos/web typecheck",
+    "test": "pnpm --filter @salesos/web test",
+    "test:e2e": "pnpm --filter @salesos/web test:e2e"
+  }
+}
