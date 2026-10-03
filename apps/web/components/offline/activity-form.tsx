@@ -1,0 +1,14 @@
+'use client';
+
+import {FormEvent,useEffect,useState} from 'react';
+import {createClient} from '@/lib/supabase/browser';
+import {useOrg} from '@/lib/org/context';
+import {clearPendingActivities,enqueueActivity,getPendingActivities} from '@/lib/offline/activity-queue';
+
+export function OfflineActivityForm({locale}:{locale:'ar'|'en'}){
+ const ar=locale==='ar';const {activeOrgId,userId}=useOrg();const [subject,setSubject]=useState('');const [type,setType]=useState('visit');const [body,setBody]=useState('');const [status,setStatus]=useState('');const [pending,setPending]=useState(0);
+ const flush=async()=>{if(!activeOrgId||!navigator.onLine)return;const items=await getPendingActivities();if(!items.length)return;const {error}=await createClient().from('activities').insert(items);if(!error){await clearPendingActivities();setPending(0);setStatus(ar?'تمت مزامنة الأنشطة.':'Activities synced.')}};
+ useEffect(()=>{getPendingActivities().then(x=>setPending(x.length)).catch(()=>{});const on=()=>flush();window.addEventListener('online',on);return()=>window.removeEventListener('online',on)},[activeOrgId]);
+ const submit=async(e:FormEvent)=>{e.preventDefault();if(!activeOrgId)return;const item={org_id:activeOrgId,actor_id:userId,type,subject,body:body||null};if(navigator.onLine){const {error}=await createClient().from('activities').insert(item);setStatus(error?error.message:(ar?'تم حفظ النشاط.':'Activity saved.'))}else{await enqueueActivity(item);setPending(v=>v+1);setStatus(ar?'أنت غير متصل؛ تم وضع النشاط في قائمة المزامنة.':'Offline; activity queued for sync.')}setSubject('');setBody('')};
+ return <form onSubmit={submit} className="rounded-2xl border bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"><div className="grid gap-3 md:grid-cols-3"><select value={type} onChange={e=>setType(e.target.value)} className="rounded-xl border bg-transparent px-3 py-2.5"><option value="visit">Visit</option><option value="call">Call</option><option value="whatsapp">WhatsApp</option><option value="meeting">Meeting</option><option value="follow_up">Follow-up</option><option value="demo">Demo</option></select><input required value={subject} onChange={e=>setSubject(e.target.value)} placeholder={ar?'عنوان النشاط':'Activity subject'} className="rounded-xl border px-3 py-2.5 md:col-span-2"/></div><textarea value={body} onChange={e=>setBody(e.target.value)} placeholder={ar?'ملاحظات':'Notes'} className="mt-3 min-h-24 w-full rounded-xl border px-3 py-2.5"/><div className="mt-3 flex flex-wrap items-center gap-3"><button className="rounded-xl bg-neutral-950 px-4 py-2.5 text-sm text-white dark:bg-white dark:text-neutral-950">{ar?'حفظ نشاط':'Save activity'}</button><span className="text-xs text-neutral-500">{pending} {ar?'معلّق للمزامنة':'pending'}</span>{status&&<span className="text-xs text-neutral-500">{status}</span>}</div></form>
+}

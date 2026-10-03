@@ -1,0 +1,3 @@
+import {CrudPage,CrudConfig} from '@/components/data/crud-page';
+const config:CrudConfig={table:'reps',title:'Sales Reps',arTitle:'المندوبون',fields:[{key:'profile_id',label:'Profile ID'},{key:'sales_type',label:'Sales type'},{key:'basic_salary',label:'Basic salary',type:'number'},{key:'hire_date',label:'Hire date',type:'date'}],columns:[{key:'profile_id',label:'Profile'},{key:'sales_type',label:'Type'},{key:'basic_salary',label:'Salary'},{key:'active',label:'Active'}]};
+export default async function Reps({params}:{params:Promise<{locale:string}>}){const {locale}=await params;return <CrudPage config={config} locale={locale==='en'?'en':'ar'}/>;}

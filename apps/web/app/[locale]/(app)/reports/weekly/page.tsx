@@ -1,0 +1,3 @@
+import {CrudPage,CrudConfig} from '@/components/data/crud-page';
+const config:CrudConfig={table:'weekly_plans',title:'Weekly Plans',arTitle:'الخطة الأسبوعية',fields:[{key:'week_start',label:'Week start',type:'date',required:true},{key:'sales_target',label:'Sales target',type:'number'},{key:'new_customers_target',label:'New customers',type:'number'},{key:'manager_notes',label:'Manager notes'}],columns:[{key:'week_start',label:'Week'},{key:'sales_target',label:'Sales target'},{key:'new_customers_target',label:'New customers'},{key:'manager_notes',label:'Manager notes'}]};
+export default async function WeeklyPlans({params}:{params:Promise<{locale:string}>}){const {locale}=await params;return <CrudPage config={config} locale={locale==='en'?'en':'ar'}/>;}

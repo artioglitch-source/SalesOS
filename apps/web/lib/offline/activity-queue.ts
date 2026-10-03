@@ -1,0 +1,7 @@
+export type PendingActivity={id?:string;org_id:string;actor_id?:string|null;account_id?:string|null;contact_id?:string|null;deal_id?:string|null;type:string;subject:string;body?:string|null;scheduled_at?:string|null;completed_at?:string|null};
+
+const DB='salesos-offline';const STORE='activities';
+function openDB():Promise<IDBDatabase>{return new Promise((resolve,reject)=>{const req=indexedDB.open(DB,1);req.onupgradeneeded=()=>req.result.createObjectStore(STORE,{keyPath:'queueId',autoIncrement:true});req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+export async function enqueueActivity(activity:PendingActivity){const db=await openDB();await new Promise<void>((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).add(activity);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error)})}
+export async function getPendingActivities():Promise<PendingActivity[]>{const db=await openDB();return await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readonly');const req=tx.objectStore(STORE).getAll();req.onsuccess=()=>resolve(req.result.map((x:any)=>{const {queueId,...rest}=x;return rest}));req.onerror=()=>reject(req.error)})}
+export async function clearPendingActivities(){const db=await openDB();await new Promise<void>((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).clear();tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error)})}

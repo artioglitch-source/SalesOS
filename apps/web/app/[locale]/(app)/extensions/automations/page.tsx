@@ -1,0 +1,3 @@
+import {CrudPage,CrudConfig} from '@/components/data/crud-page';
+const config:CrudConfig={table:'automations',title:'Automations',arTitle:'الأتمتة',fields:[{key:'name',label:'Name',required:true},{key:'trigger_key',label:'Trigger',required:true},{key:'enabled',label:'Enabled'},{key:'conditions',label:'Conditions JSON'},{key:'actions',label:'Actions JSON'}],columns:[{key:'name',label:'Name'},{key:'trigger_key',label:'Trigger'},{key:'enabled',label:'Enabled'}]};
+export default async function Automations({params}:{params:Promise<{locale:string}>}){const {locale}=await params;return <CrudPage config={config} locale={locale==='en'?'en':'ar'}/>;}

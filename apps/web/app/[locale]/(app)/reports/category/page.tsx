@@ -1,0 +1,3 @@
+import {CrudPage,CrudConfig} from '@/components/data/crud-page';
+const config:CrudConfig={table:'category_plans',title:'Category Plans',arTitle:'خطة الأصناف',fields:[{key:'period',label:'Period',type:'date',required:true},{key:'target',label:'Target',type:'number'},{key:'target_customers',label:'Target customers',type:'number'},{key:'activation_plan',label:'Activation plan'}],columns:[{key:'period',label:'Period'},{key:'target',label:'Target'},{key:'target_customers',label:'Target customers'},{key:'activation_plan',label:'Plan'}]};
+export default async function CategoryPlans({params}:{params:Promise<{locale:string}>}){const {locale}=await params;return <CrudPage config={config} locale={locale==='en'?'en':'ar'}/>;}
