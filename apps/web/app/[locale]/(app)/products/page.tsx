@@ -1,1 +1,2 @@
-import {CatalogPage} from '@/components/admin/catalog-page'; export default async function Products({params}:{params:Promise<{locale:string}>}){const {locale}=await params;return <CatalogPage locale={locale==='en'?'en':'ar'}/>;}
+import {CatalogPage} from '@/components/admin/catalog-page';
+export default async function Products({params}:{params:Promise<{locale:string}>}){const {locale}=await params;return <CatalogPage locale={locale==='en'?'en':'ar'}/>;}
