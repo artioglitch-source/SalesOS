@@ -1,1 +1,2 @@
-import MasterData from '@/components/admin/master-data'; export default async function Teams({params}:{params:Promise<{locale:string}>}){const {locale}=await params;return <MasterData locale={locale==='en'?'en':'ar'} kind="teams"/>;}
+import MasterData from '@/components/admin/master-data';
+export default async function Teams({params}:{params:Promise<{locale:string}>}){const {locale}=await params;return <MasterData locale={locale==='en'?'en':'ar'} kind="teams"/>;}
