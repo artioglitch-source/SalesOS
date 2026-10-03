@@ -1,0 +1,3 @@
+import {CrudPage,CrudConfig} from '@/components/data/crud-page';
+const config:CrudConfig={table:'products',title:'Products',arTitle:'المنتجات',fields:[{key:'sku',label:'SKU'},{key:'name',label:'Name',required:true},{key:'description',label:'Description'},{key:'unit_price',label:'Unit price',type:'number'},{key:'cost_price',label:'Cost price',type:'number'},{key:'tax_rate',label:'Tax rate',type:'number'}],columns:[{key:'sku',label:'SKU'},{key:'name',label:'Name'},{key:'unit_price',label:'Price'},{key:'cost_price',label:'Cost'},{key:'active',label:'Active'}]};
+export default async function Products({params}:{params:Promise<{locale:string}>}){const {locale}=await params;return <CrudPage config={config} locale={locale==='en'?'en':'ar'}/>;}
