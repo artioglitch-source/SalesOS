@@ -2,12 +2,15 @@
   "name": "salesos",
   "private": true,
   "packageManager": "pnpm@10.12.4",
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
-    "dev": "pnpm --filter @salesos/web dev",
-    "build": "pnpm --filter @salesos/web build",
-    "lint": "pnpm --filter @salesos/web lint",
-    "typecheck": "pnpm --filter @salesos/web typecheck",
-    "test": "pnpm --filter @salesos/web test",
-    "test:e2e": "pnpm --filter @salesos/web test:e2e"
+    "dev": "npm --workspace @salesos/web run dev",
+    "build": "npm --workspace @salesos/web run build",
+    "lint": "npm --workspace @salesos/web run lint",
+    "typecheck": "npm --workspace @salesos/web run typecheck",
+    "test": "npm --workspace @salesos/web run test",
+    "test:e2e": "npm --workspace @salesos/web run test:e2e"
   }
 }

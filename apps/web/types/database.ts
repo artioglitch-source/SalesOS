@@ -1203,6 +1203,13 @@ export type Database = {
             referencedRelation: "v_product_perf"
             referencedColumns: ["product_id"]
           },
+          {
+            foreignKeyName: "deal_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_products_catalog"
+            referencedColumns: ["id"]
+          },
         ]
       }
       deals: {
@@ -1629,6 +1636,13 @@ export type Database = {
             referencedRelation: "v_product_perf"
             referencedColumns: ["product_id"]
           },
+          {
+            foreignKeyName: "invoice_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_products_catalog"
+            referencedColumns: ["id"]
+          },
         ]
       }
       invoice_lines: {
@@ -1714,6 +1728,13 @@ export type Database = {
             referencedRelation: "v_product_perf"
             referencedColumns: ["product_id"]
           },
+          {
+            foreignKeyName: "invoice_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_products_catalog"
+            referencedColumns: ["id"]
+          },
         ]
       }
       invoices: {
@@ -1747,7 +1768,7 @@ export type Database = {
           deal_id?: string | null
           due_date?: string | null
           id?: string
-          invoice_number: string
+          invoice_number?: string
           issue_date?: string
           notes?: string | null
           org_id: string
@@ -2964,6 +2985,13 @@ export type Database = {
             referencedColumns: ["product_id"]
           },
           {
+            foreignKeyName: "quote_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_products_catalog"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "quote_lines_quote_id_fkey"
             columns: ["quote_id"]
             isOneToOne: false
@@ -2997,7 +3025,7 @@ export type Database = {
           notes?: string | null
           org_id: string
           quote_date?: string
-          quote_number: string
+          quote_number?: string
           rep_id?: string | null
           stage?: string
           value?: number
@@ -3702,6 +3730,13 @@ export type Database = {
             referencedColumns: ["product_id"]
           },
           {
+            foreignKeyName: "invoice_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_products_catalog"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "invoices_account_id_fkey"
             columns: ["account_id"]
             isOneToOne: false
@@ -3742,6 +3777,22 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_cross_sell_gaps"
             referencedColumns: ["product_group_id"]
+          },
+        ]
+      }
+      v_monthly_sales: {
+        Row: {
+          org_id: string | null
+          period_month: string | null
+          sales: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3793,6 +3844,73 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "invoice_lines_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_products_catalog: {
+        Row: {
+          active: boolean | null
+          code: string | null
+          created_at: string | null
+          description: string | null
+          group_id: string | null
+          id: string | null
+          name: string | null
+          org_id: string | null
+          sku: string | null
+          tax_rate: number | null
+          unit: string | null
+          unit_price: number | null
+        }
+        Insert: {
+          active?: boolean | null
+          code?: string | null
+          created_at?: string | null
+          description?: string | null
+          group_id?: string | null
+          id?: string | null
+          name?: string | null
+          org_id?: string | null
+          sku?: string | null
+          tax_rate?: number | null
+          unit?: string | null
+          unit_price?: number | null
+        }
+        Update: {
+          active?: boolean | null
+          code?: string | null
+          created_at?: string | null
+          description?: string | null
+          group_id?: string | null
+          id?: string | null
+          name?: string | null
+          org_id?: string | null
+          sku?: string | null
+          tax_rate?: number | null
+          unit?: string | null
+          unit_price?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "product_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "v_cross_sell_gaps"
+            referencedColumns: ["product_group_id"]
+          },
+          {
+            foreignKeyName: "products_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -3956,6 +4074,13 @@ export type Database = {
             referencedColumns: ["product_id"]
           },
           {
+            foreignKeyName: "invoice_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_products_catalog"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "invoices_account_id_fkey"
             columns: ["account_id"]
             isOneToOne: false
@@ -4006,6 +4131,231 @@ export type Database = {
           },
         ]
       }
+      v_sales_lines_privileged: {
+        Row: {
+          account_id: string | null
+          cost_total: number | null
+          discount: number | null
+          gp_pct: number | null
+          gross_profit: number | null
+          id: string | null
+          invoice_id: string | null
+          invoice_number: string | null
+          issue_date: string | null
+          net_sales: number | null
+          org_id: string | null
+          product_id: string | null
+          product_name: string | null
+          qty: number | null
+          region_id: string | null
+          rep_id: string | null
+          unit_price: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_lines_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "v_receivables_aging"
+            referencedColumns: ["invoice_id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "v_sales_lines"
+            referencedColumns: ["invoice_id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_product_perf"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_products_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "v_cross_sell_gaps"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "invoices_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "v_customer_health"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_region_id_fkey"
+            columns: ["region_id"]
+            isOneToOne: false
+            referencedRelation: "regions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_rep_id_fkey"
+            columns: ["rep_id"]
+            isOneToOne: false
+            referencedRelation: "reps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_rep_id_fkey"
+            columns: ["rep_id"]
+            isOneToOne: false
+            referencedRelation: "v_rep_month"
+            referencedColumns: ["rep_id"]
+          },
+        ]
+      }
+      v_sales_lines_public: {
+        Row: {
+          account_id: string | null
+          discount: number | null
+          id: string | null
+          invoice_id: string | null
+          invoice_number: string | null
+          issue_date: string | null
+          net_sales: number | null
+          org_id: string | null
+          product_id: string | null
+          product_name: string | null
+          qty: number | null
+          region_id: string | null
+          rep_id: string | null
+          unit_price: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_lines_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "v_receivables_aging"
+            referencedColumns: ["invoice_id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "v_sales_lines"
+            referencedColumns: ["invoice_id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_product_perf"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_products_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "v_cross_sell_gaps"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "invoices_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "v_customer_health"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_region_id_fkey"
+            columns: ["region_id"]
+            isOneToOne: false
+            referencedRelation: "regions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_rep_id_fkey"
+            columns: ["rep_id"]
+            isOneToOne: false
+            referencedRelation: "reps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_rep_id_fkey"
+            columns: ["rep_id"]
+            isOneToOne: false
+            referencedRelation: "v_rep_month"
+            referencedColumns: ["rep_id"]
+          },
+        ]
+      }
     }
     Functions: {
       calculate_commission: {
@@ -4023,7 +4373,6 @@ export type Database = {
         Args: { p_achievement: number; p_plan: string }
         Returns: number
       }
-      create_organization: { Args: { p_name: string }; Returns: string }
       evaluate_kpi_score: { Args: { p_evaluation_id: string }; Returns: number }
       get_dashboard_summary: { Args: { target_org_id: string }; Returns: Json }
       gp_amount: { Args: { cost: number; net: number }; Returns: number }
@@ -4034,6 +4383,17 @@ export type Database = {
       net_sales: {
         Args: { discount: number; q: number; unit_price: number }
         Returns: number
+      }
+      next_invoice_number: { Args: never; Returns: string }
+      next_quote_number: { Args: never; Returns: string }
+      record_payment_and_allocate: {
+        Args: {
+          p_amount: number
+          p_invoice_id: string
+          p_method: string
+          p_reference?: string
+        }
+        Returns: string
       }
       rep_status: { Args: { achievement: number }; Returns: string }
     }
@@ -4168,3 +4528,4 @@ export const Constants = {
     Enums: {},
   },
 } as const
+

@@ -12,7 +12,7 @@ export type CrudConfig={table:string;title:string;arTitle:string;fields:Field[];
 function csvEscape(value:unknown){const s=String(value??'');return '"'+s.replaceAll('"','""')+'"';}
 
 export function CrudPage({config,locale}:{config:CrudConfig;locale:'ar'|'en'}){
- const ar=locale==='ar';const supabase=useMemo(()=>createClient(),[]);const {activeOrgId}=useOrg();const [rows,setRows]=useState<any[]>([]);const [values,setValues]=useState<Record<string,string>>({});const [editingId,setEditingId]=useState<string|null>(null);const [query,setQuery]=useState('');const [busy,setBusy]=useState(false);const [error,setError]=useState('');
+ const ar=locale==='ar';const supabase=useMemo<any>(()=>createClient() as any,[]);const {activeOrgId}=useOrg();const [rows,setRows]=useState<any[]>([]);const [values,setValues]=useState<Record<string,string>>({});const [editingId,setEditingId]=useState<string|null>(null);const [query,setQuery]=useState('');const [busy,setBusy]=useState(false);const [error,setError]=useState('');
  const load=async()=>{if(!activeOrgId)return;const {data,error}=await supabase.from(config.table).select('*').eq('org_id',activeOrgId).order('created_at',{ascending:false});if(error)setError(error.message);else setRows(data??[])};
  useEffect(()=>{load()},[activeOrgId,config.table]);
  const filtered=rows.filter(r=>JSON.stringify(r).toLowerCase().includes(query.toLowerCase()));
