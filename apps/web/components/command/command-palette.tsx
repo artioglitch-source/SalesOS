@@ -1,13 +1,16 @@
 'use client';
 
-import {useEffect,useState} from 'react';
-import {useRouter,usePathname} from 'next/navigation';
-
-const items=[['dashboard','Dashboard','/'],['sales','Sales','/sales'],['accounts','Accounts','/accounts'],['contacts','Contacts','/contacts'],['leads','Leads','/leads'],['deals','Deals','/deals'],['pipeline','Pipeline','/pipeline'],['activities','Activities','/activities'],['collections','Collections','/collections'],['targets','Targets','/targets'],['tasks','Tasks','/tasks'],['products','Products','/products'],['performance','Performance','/performance'],['kpi','KPI','/kpi'],['payroll','Payroll','/payroll'],['finance','Finance','/finance'],['hr','HR','/hr'],['reports','Reports','/reports'],['alerts','Alerts','/alerts'],['assistant','Assistant','/assistant'],['extensions','Extensions','/extensions'],['settings','Settings','/settings']] as const;
+import {useEffect,useMemo,useState} from 'react';
+import {usePathname,useRouter} from 'next/navigation';
+import {Command,Search,Plus,CornerDownLeft,Sparkles} from 'lucide-react';
+import {navGroups} from '@/lib/navigation';
 
 export function CommandPalette(){
- const router=useRouter();const path=usePathname();const locale=path.split('/')[1]||'ar';const [open,setOpen]=useState(false);const [q,setQ]=useState('');
- useEffect(()=>{const f=(e:KeyboardEvent)=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();setOpen(v=>!v)}};window.addEventListener('keydown',f);return()=>window.removeEventListener('keydown',f)},[]);
- useEffect(()=>{if(!open)setQ('')},[open]);if(!open)return null;const filtered=items.filter(i=>i[1].toLowerCase().includes(q.toLowerCase()));
- return <div className="fixed inset-0 z-50 bg-black/40 p-4 md:p-20" onMouseDown={()=>setOpen(false)}><div className="mx-auto max-w-xl overflow-hidden rounded-2xl border bg-white shadow-xl dark:border-neutral-800 dark:bg-neutral-900" onMouseDown={e=>e.stopPropagation()}><input autoFocus value={q} onChange={e=>setQ(e.target.value)} placeholder="Search..." className="w-full border-b bg-transparent px-4 py-4 outline-none"/><div className="max-h-80 overflow-y-auto p-2">{filtered.map(i=><button key={i[0]} onClick={()=>{router.push('/'+locale+i[2]);setOpen(false)}} className="block w-full rounded-xl px-3 py-3 text-start text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800">{i[1]}</button>)}</div></div></div>
+ const path=usePathname();const router=useRouter();const locale=(path.split('/')[1]||'ar') as 'ar'|'en';const ar=locale==='ar';
+ const [open,setOpen]=useState(false);const [q,setQ]=useState('');
+ const items=useMemo(()=>navGroups.flatMap(g=>g.items.map(i=>({id:i.id,href:i.href,label:ar?i.ar:i.en}))),[ar]);
+ useEffect(()=>{const onKey=(e:KeyboardEvent)=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();setOpen(v=>!v)}if(e.key==='Escape')setOpen(false)};window.addEventListener('keydown',onKey);return()=>window.removeEventListener('keydown',onKey)},[]);
+ if(!open)return null;const filtered=items.filter(i=>i.label.toLowerCase().includes(q.toLowerCase())).slice(0,12);
+ const go=(href:string)=>{router.push('/'+locale+href);setOpen(false)};
+ return <div className="fixed inset-0 z-[70] bg-black/40 p-4 backdrop-blur-sm" onMouseDown={()=>setOpen(false)}><div className="mx-auto mt-[10vh] max-w-2xl overflow-hidden rounded-3xl border bg-white shadow-2xl dark:border-neutral-800 dark:bg-neutral-900" onMouseDown={e=>e.stopPropagation()}><div className="flex items-center gap-3 border-b px-4"><Search className="size-4 text-neutral-400"/><input autoFocus value={q} onChange={e=>setQ(e.target.value)} placeholder={ar?'ابحث في SalesOS...':'Search SalesOS...'} className="h-14 flex-1 bg-transparent outline-none"/><kbd className="hidden rounded-lg border px-2 py-1 text-[10px] md:block">ESC</kbd></div><div className="max-h-[55vh] overflow-y-auto p-2">{filtered.map(item=><button key={item.id} onClick={()=>go(item.href)} className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-start text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800"><span className="flex items-center gap-3"><span className="flex size-8 items-center justify-center rounded-lg border"><Command className="size-4"/></span>{item.label}</span><CornerDownLeft className="size-4 text-neutral-400"/></button>)}{q.length===0&&<div className="grid gap-2 border-t p-2 sm:grid-cols-2"><button onClick={()=>go('/sales/new')} className="rounded-xl border p-3 text-start text-sm"><Plus className="mb-1 size-4"/>{ar?'تسجيل بيع':'Record sale'}</button><button onClick={()=>go('/assistant')} className="rounded-xl border p-3 text-start text-sm"><Sparkles className="mb-1 size-4"/>{ar?'اسأل المساعد':'Ask assistant'}</button></div>}</div></div></div>;
 }
