@@ -1,1 +1,2 @@
-import ExtensionsDashboard from '@/components/platform/extensions-dashboard'; export default async function Extensions({params}:{params:Promise<{locale:string}>}){const {locale}=await params;return <ExtensionsDashboard locale={locale==='en'?'en':'ar'}/>;}
+import ExtensionsDashboard from '@/components/platform/extensions-dashboard';
+export default async function Extensions({params}:{params:Promise<{locale:string}>}){const {locale}=await params;return <ExtensionsDashboard locale={locale==='en'?'en':'ar'}/>;}
