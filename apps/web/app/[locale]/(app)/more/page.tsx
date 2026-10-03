@@ -1,0 +1,13 @@
+'use client';
+
+import Link from 'next/link';
+import {usePathname} from 'next/navigation';
+import {Activity,AlertTriangle,BarChart3,Boxes,Building2,CalendarDays,FileBarChart,Kanban,Layers3,Package,Plug,Receipt,Settings,Sparkles,Target,Upload,Users,WalletCards} from 'lucide-react';
+import {navGroups} from '@/lib/navigation';
+
+const iconMap:any={home:Boxes,receipt:Receipt,building:Building2,users:Users,target:Target,briefcase:Boxes,kanban:Kanban,activity:Activity,check:Target,wallet:WalletCards,gauge:Target,package:Package,map:Building2,layers:Layers3,'user-check':Users,sparkles:Sparkles,chart:BarChart3,coins:WalletCards,landmark:WalletCards,report:FileBarChart,bell:AlertTriangle,bot:Sparkles,calendar:CalendarDays,upload:Upload,plug:Plug,settings:Settings};
+
+export default function MorePage(){
+ const path=usePathname();const locale=(path.split('/')[1]||'ar') as 'ar'|'en';const ar=locale==='ar';
+ return <section className="space-y-6 p-4 md:p-7"><div><p className="text-xs uppercase tracking-[0.18em] text-neutral-400">SalesOS</p><h1 className="mt-1 text-3xl font-semibold">{ar?'كل الأدوات':'All tools'}</h1><p className="mt-2 text-sm text-neutral-500">{ar?'كل وحدات المنصة وأدوات التشغيل من مكان واحد.':'Every module and operating tool in one place.'}</p></div><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{navGroups.flatMap(g=>g.items.map(item=>{const Icon=iconMap[item.icon]||Boxes;const desc=g.label==='workspace'?(ar?'إدارة العملاء والمبيعات والفرص.':'Customers, sales, and opportunities.'):g.label==='operations'?(ar?'تشغيل الفريق والتحصيل والنشاط.':'Team, collections, and activity operations.'):g.label==='people & finance'?(ar?'KPI والرواتب والموارد البشرية.':'KPI, payroll, and people operations.'):(ar?'التقارير والمساعد والامتدادات.':'Reports, assistant, and platform extensions.');return <Link key={item.id} href={'/'+locale+item.href} className="group rounded-2xl border bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900"><div className="flex items-center justify-between"><span className="flex size-10 items-center justify-center rounded-xl border bg-neutral-50 dark:bg-neutral-950"><Icon className="size-5"/></span><span className="text-xs text-neutral-400">↗</span></div><h2 className="mt-5 font-semibold">{ar?item.ar:item.en}</h2><p className="mt-1 text-xs text-neutral-500">{desc}</p></Link>}))}</div><div className="flex items-center gap-2 text-xs text-neutral-500"><Target className="size-4"/>{ar?'الاختصارات والعمليات الحساسة تحترم صلاحيات حسابك.':'Shortcuts and sensitive operations respect your account permissions.'}</div></section>;
+}
