@@ -24,6 +24,7 @@ export const moduleCatalog:ModuleManifest[]=[
  {id:'reports',name:'Reports',version:'1.0.0',enabledByDefault:true,nav:[{label:'Reports',href:'/reports'}]},
  {id:'import',name:'Import',version:'1.0.0',enabledByDefault:true,nav:[{label:'Import',href:'/import'}]},
  {id:'alerts',name:'Alerts',version:'1.0.0',enabledByDefault:true,nav:[{label:'Alerts',href:'/alerts'}]},
+ {id:'brief',name:'Daily Brief',version:'1.0.0',enabledByDefault:true,nav:[{label:'Daily Brief',href:'/brief'}]},
  {id:'assistant',name:'Assistant',version:'1.0.0',enabledByDefault:true,nav:[{label:'Assistant',href:'/assistant'}]},
  {id:'extensions',name:'Extensions',version:'1.0.0',enabledByDefault:true,nav:[{label:'Extensions',href:'/extensions'}]},
  {id:'settings',name:'Settings',version:'1.0.0',enabledByDefault:true,nav:[{label:'Settings',href:'/settings'}]},
