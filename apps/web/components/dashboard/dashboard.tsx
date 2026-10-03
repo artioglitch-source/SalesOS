@@ -1,0 +1,36 @@
+'use client';
+
+import {useEffect,useMemo,useState} from 'react';
+import {ArrowUpRight,BriefcaseBusiness,Building2,CheckSquare,Coins,Users,UserRoundCheck} from 'lucide-react';
+import Link from 'next/link';
+import {createClient} from '@/lib/supabase/browser';
+import {useOrg} from '@/lib/org/context';
+
+export function Dashboard({locale}:{locale:'ar'|'en'}){
+  const ar=locale==='ar'; const supabase=useMemo(()=>createClient(),[]); const {activeOrgId}=useOrg();
+  const [stats,setStats]=useState({accounts:0,contacts:0,leads:0,deals:0,tasks:0,pipeline:0,paid:0}); const [loading,setLoading]=useState(true);
+  useEffect(()=>{(async()=>{if(!activeOrgId){setLoading(false);return}
+    const [a,c,l,d,t,p]=await Promise.all([
+      supabase.from('accounts').select('*',{count:'exact',head:true}).eq('org_id',activeOrgId),
+      supabase.from('contacts').select('*',{count:'exact',head:true}).eq('org_id',activeOrgId),
+      supabase.from('leads').select('*',{count:'exact',head:true}).eq('org_id',activeOrgId),
+      supabase.from('deals').select('value').eq('org_id',activeOrgId),
+      supabase.from('tasks').select('*',{count:'exact',head:true}).eq('org_id',activeOrgId).neq('status','done'),
+      supabase.from('payments').select('amount').eq('org_id',activeOrgId)
+    ]);
+    setStats({accounts:a.count??0,contacts:c.count??0,leads:l.count??0,deals:d.data?.length??0,tasks:t.count??0,pipeline:(d.data??[]).reduce((s,r)=>s+Number(r.value||0),0),paid:(p.data??[]).reduce((s,r)=>s+Number(r.amount||0),0)});setLoading(false)
+  })()},[activeOrgId,supabase]);
+  const cards=[
+    [Building2,ar?'الحسابات':'Accounts',stats.accounts,'/accounts'],
+    [Users,ar?'جهات الاتصال':'Contacts',stats.contacts,'/contacts'],
+    [UserRoundCheck,ar?'العملاء المحتملون':'Leads',stats.leads,'/leads'],
+    [BriefcaseBusiness,ar?'الصفقات':'Deals',stats.deals,'/deals'],
+    [CheckSquare,ar?'المهام المفتوحة':'Open tasks',stats.tasks,'/tasks'],
+  ] as const;
+  return <section className="p-4 md:p-8">
+    <div className="rounded-3xl border bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-sm text-neutral-500">{ar?'لوحة التحكم':'Dashboard'}</p><h1 className="mt-1 text-3xl font-semibold">{ar?'مركز قيادة المبيعات والعمليات':'Sales & operations command center'}</h1><p className="mt-2 max-w-2xl text-sm text-neutral-500">{ar?'تابع العملاء والصفقات والمهام والمالية من مساحة عمل واحدة.':'Track customers, pipeline, tasks, and finance from one workspace.'}</p></div><Link href={'/'+locale+'/reports'} className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm">{ar?'التقارير':'Reports'}<ArrowUpRight className="size-4"/></Link></div>
+      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">{cards.map(([Icon,label,value,href])=><Link href={'/'+locale+href} key={href} className="rounded-2xl border p-4 transition hover:-translate-y-0.5 hover:shadow-sm dark:border-neutral-800"><Icon className="size-5 text-neutral-500"/><p className="mt-4 text-xs text-neutral-500">{label}</p><p className="mt-1 text-2xl font-semibold">{loading?'—':value}</p></Link>)}</div>
+      <div className="mt-4 grid gap-4 md:grid-cols-2"><div className="rounded-2xl border p-5 dark:border-neutral-800"><div className="flex items-center gap-2 text-sm text-neutral-500"><BriefcaseBusiness className="size-4"/>{ar?'إجمالي خط الصفقات':'Pipeline value'}</div><p className="mt-2 text-3xl font-semibold">{stats.pipeline.toLocaleString()} EGP</p></div><div className="rounded-2xl border p-5 dark:border-neutral-800"><div className="flex items-center gap-2 text-sm text-neutral-500"><Coins className="size-4"/>{ar?'المدفوعات المستلمة':'Payments received'}</div><p className="mt-2 text-3xl font-semibold">{stats.paid.toLocaleString()} EGP</p></div></div>
+    </div>
+  </section>
+}

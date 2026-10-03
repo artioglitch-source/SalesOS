@@ -1,0 +1,46 @@
+'use client';
+
+import {FormEvent,useEffect,useMemo,useState} from 'react';
+import {Pencil,Plus,Search,Trash2,X} from 'lucide-react';
+import {createClient} from '@/lib/supabase/browser';
+import {useOrg} from '@/lib/org/context';
+
+export type Field = {key:string;label:string;type?:'text'|'number'|'date'|'datetime';required?:boolean};
+export type CrudConfig = {table:string;title:string;arTitle:string;fields:Field[];columns:Field[]};
+
+export function CrudPage({config,locale}:{config:CrudConfig;locale:'ar'|'en'}){
+  const ar=locale==='ar'; const supabase=useMemo(()=>createClient(),[]);
+  const {activeOrgId}=useOrg();
+  const [rows,setRows]=useState<any[]>([]); const [values,setValues]=useState<Record<string,string>>({});
+  const [editingId,setEditingId]=useState<string|null>(null); const [query,setQuery]=useState('');
+  const [busy,setBusy]=useState(false); const [error,setError]=useState('');
+  const load=async()=>{if(!activeOrgId)return; const {data,error}=await supabase.from(config.table).select('*').eq('org_id',activeOrgId).order('created_at',{ascending:false}); if(error)setError(error.message); else setRows(data??[]);};
+  useEffect(()=>{load()},[activeOrgId,config.table]);
+  const filtered=rows.filter(r=>JSON.stringify(r).toLowerCase().includes(query.toLowerCase()));
+  const submit=async(e:FormEvent)=>{e.preventDefault();if(!activeOrgId)return;setBusy(true);setError('');
+    const payload={...values,org_id:activeOrgId};
+    for(const f of config.fields) if(f.type==='number'&&payload[f.key]!==undefined&&payload[f.key]!=='') payload[f.key]=String(Number(payload[f.key]));
+    const result=editingId?await supabase.from(config.table).update(payload).eq('id',editingId).eq('org_id',activeOrgId):await supabase.from(config.table).insert(payload);
+    if(result.error)setError(result.error.message); else {setValues({});setEditingId(null);await load();}
+    setBusy(false);
+  };
+  const startEdit=(row:any)=>{const next:Record<string,string>={};config.fields.forEach(f=>next[f.key]=row[f.key]===null||row[f.key]===undefined?'':String(row[f.key]));setValues(next);setEditingId(row.id);window.scrollTo({top:0,behavior:'smooth'})};
+  const remove=async(id:string)=>{if(!confirm(ar?'هل تريد حذف هذا السجل؟':'Delete this record?'))return;const {error}=await supabase.from(config.table).delete().eq('id',id).eq('org_id',activeOrgId);if(error)setError(error.message);else await load()};
+  return <section className="space-y-5 p-4 md:p-8">
+    <div className="flex flex-wrap items-end justify-between gap-3">
+      <div><p className="text-sm text-neutral-500">SalesOS</p><h1 className="mt-1 text-2xl font-semibold">{ar?config.arTitle:config.title}</h1></div>
+      <div className="relative min-w-64"><Search className="absolute start-3 top-3 size-4 text-neutral-400"/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder={ar?'بحث...':'Search...'} className="w-full rounded-xl border bg-white py-2.5 ps-9 pe-3 text-sm dark:border-neutral-800 dark:bg-neutral-900"/></div>
+    </div>
+    <form onSubmit={submit} className="rounded-2xl border bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+      <div className="mb-4 flex items-center justify-between"><h2 className="font-medium">{editingId?(ar?'تعديل السجل':'Edit record'):(ar?'إضافة جديد':'Add new')}</h2>{editingId&&<button type="button" onClick={()=>{setEditingId(null);setValues({})}} className="rounded-lg border p-1.5"><X className="size-4"/></button>}</div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{config.fields.map(f=><label key={f.key} className="text-sm"><span className="mb-1 block text-neutral-600 dark:text-neutral-400">{f.label}</span><input required={f.required} type={f.type==='datetime'?'datetime-local':f.type??'text'} value={values[f.key]??''} onChange={e=>setValues(v=>({...v,[f.key]:e.target.value}))} className="w-full rounded-xl border px-3 py-2.5 outline-none focus:ring-2 dark:border-neutral-700 dark:bg-neutral-950"/></label>)}</div>
+      <button disabled={busy} className="mt-4 inline-flex items-center gap-2 rounded-xl bg-neutral-950 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50 dark:bg-white dark:text-neutral-950"><Plus className="size-4"/>{editingId?(ar?'حفظ التعديلات':'Save changes'):(ar?'إضافة':'Add')}</button>
+      {error&&<p className="mt-3 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+    </form>
+    <div className="overflow-x-auto rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
+      <table className="min-w-full text-sm"><thead className="border-b bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-950"><tr>{config.columns.map(c=><th key={c.key} className="px-4 py-3 text-start font-medium">{c.label}</th>)}<th className="px-4 py-3 text-end"></th></tr></thead>
+      <tbody>{filtered.map(row=><tr key={row.id} className="border-b last:border-0 dark:border-neutral-800">{config.columns.map(c=><td key={c.key} className="px-4 py-3">{c.key==='status'?<span className="rounded-full border px-2 py-1 text-xs">{row[c.key]}</span>:String(row[c.key]??'—')}</td>)}<td className="px-4 py-3"><div className="flex justify-end gap-1"><button onClick={()=>startEdit(row)} className="rounded-lg border p-2"><Pencil className="size-4"/></button><button onClick={()=>remove(row.id)} className="rounded-lg border p-2 text-red-600"><Trash2 className="size-4"/></button></div></td></tr>)}</tbody></table>
+      {filtered.length===0&&<div className="p-10 text-center text-sm text-neutral-500">{ar?'لا توجد سجلات بعد.':'No records yet.'}</div>}
+    </div>
+  </section>
+}

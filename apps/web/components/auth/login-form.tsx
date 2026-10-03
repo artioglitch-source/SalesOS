@@ -1,0 +1,54 @@
+'use client';
+
+import {FormEvent,useState} from 'react';
+import {useRouter} from 'next/navigation';
+import {createClient} from '@/lib/supabase/browser';
+
+export function LoginForm({locale}:{locale:'ar'|'en'}) {
+  const router=useRouter();
+  const supabase=createClient();
+  const ar=locale==='ar';
+  const [mode,setMode]=useState<'login'|'signup'|'magic'>('login');
+  const [email,setEmail]=useState('');
+  const [password,setPassword]=useState('');
+  const [name,setName]=useState('');
+  const [busy,setBusy]=useState(false);
+  const [message,setMessage]=useState('');
+  const submit=async(e:FormEvent)=>{
+    e.preventDefault(); setBusy(true); setMessage('');
+    if(mode==='magic'){
+      const {error}=await supabase.auth.signInWithOtp({email,options:{emailRedirectTo:window.location.origin+'/'+locale+'/onboarding'}});
+      setMessage(error?.message ?? (ar?'تم إرسال رابط الدخول إلى بريدك.':'Magic link sent.'));
+    } else if(mode==='login'){
+      const {error}=await supabase.auth.signInWithPassword({email,password});
+      if(error) setMessage(error.message); else router.push('/'+locale);
+    } else {
+      const {data,error}=await supabase.auth.signUp({email,password,options:{data:{full_name:name},emailRedirectTo:window.location.origin+'/'+locale+'/onboarding'}});
+      if(error) setMessage(error.message);
+      else if(data.session) router.push('/'+locale+'/onboarding');
+      else setMessage(ar?'تحقق من بريدك الإلكتروني ثم سجّل الدخول.':'Check your email, then sign in.');
+    }
+    setBusy(false);
+  };
+  return <div className="w-full max-w-md rounded-2xl border bg-white p-7 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+    <div className="mb-7">
+      <p className="text-sm font-medium text-neutral-500">SalesOS</p>
+      <h1 className="mt-2 text-2xl font-semibold">{ar?'تسجيل الدخول':'Sign in'}</h1>
+      <p className="mt-2 text-sm text-neutral-500">{ar?'نظام مبيعات وعمليات متعدد الوحدات.':'Modular sales and operations workspace.'}</p>
+    </div>
+    <form onSubmit={submit} className="space-y-4">
+      {mode==='signup'&&<input value={name} onChange={e=>setName(e.target.value)} placeholder={ar?'الاسم الكامل':'Full name'} className="w-full rounded-xl border px-3 py-2.5 outline-none focus:ring-2" required/>}
+      <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder={ar?'البريد الإلكتروني':'Email'} className="w-full rounded-xl border px-3 py-2.5 outline-none focus:ring-2" required/>
+      {mode!=='magic'&&<input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder={ar?'كلمة المرور':'Password'} className="w-full rounded-xl border px-3 py-2.5 outline-none focus:ring-2" required minLength={6}/>}
+      <button disabled={busy} className="w-full rounded-xl bg-neutral-950 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50 dark:bg-white dark:text-neutral-950">
+        {busy?(ar?'جارٍ التنفيذ...':'Working...'):(mode==='signup'?(ar?'إنشاء حساب':'Create account'):(mode==='magic'?(ar?'إرسال رابط الدخول':'Send magic link'):(ar?'تسجيل الدخول':'Sign in')))}
+      </button>
+      {message&&<p className="rounded-xl bg-neutral-100 p-3 text-sm dark:bg-neutral-800">{message}</p>}
+    </form>
+    <div className="mt-6 grid grid-cols-3 gap-2 text-xs">
+      <button onClick={()=>setMode('login')} className="rounded-lg border px-2 py-2">{ar?'دخول':'Login'}</button>
+      <button onClick={()=>setMode('signup')} className="rounded-lg border px-2 py-2">{ar?'حساب':'Sign up'}</button>
+      <button onClick={()=>setMode('magic')} className="rounded-lg border px-2 py-2">{ar?'رابط':'Magic link'}</button>
+    </div>
+  </div>;
+}
