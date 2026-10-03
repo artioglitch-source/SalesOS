@@ -11,7 +11,7 @@ export async function GET(){
  if(!membership)return NextResponse.json({error:'Owner permission required'},{status:403});
  const out:any={version:1,exported_at:new Date().toISOString(),org_id:membership.org_id,tables:{}};
  for(const table of tables){
-  const {data,error}=await supabase.from(table).select('*').eq('org_id',membership.org_id).limit(5000);
+  const {data,error}=await (supabase as any).from(table).select('*').eq('org_id',membership.org_id).limit(5000);
   if(error)return NextResponse.json({error:'Export failed for '+table+': '+error.message},{status:500});
   out.tables[table]=data??[];
  }
