@@ -1,1 +1,2 @@
-import {ContactList} from '@/components/data/contact-list'; export default async function Contacts({params}:{params:Promise<{locale:string}>}){const {locale}=await params;return <ContactList locale={locale==='en'?'en':'ar'}/>}
+import ContactList from '@/components/data/contact-list';
+export default async function Contacts({params}:{params:Promise<{locale:string}>}){const {locale}=await params;return <ContactList locale={locale==='en'?'en':'ar'}/>;}
