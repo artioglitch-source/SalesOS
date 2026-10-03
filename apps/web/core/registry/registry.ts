@@ -1,8 +1,4 @@
 import type {ModuleManifest} from './types';
-import {helloModule} from '@/../modules/hello/manifest';
+import {moduleCatalog} from '@/../modules/catalog';
 
-const manifests: ModuleManifest[] = [helloModule];
-
-export function getModuleManifests(): ModuleManifest[] {
-  return manifests;
-}
+export function getModuleManifests():ModuleManifest[]{return moduleCatalog;}
