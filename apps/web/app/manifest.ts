@@ -7,10 +7,10 @@ export default function manifest():MetadataRoute.Manifest{
   description:'Sales and operations workspace',
   start_url:'/ar',
   display:'standalone',
-  background_color:'#0a0a0a',
-  theme_color:'#0a0a0a',
-  lang:'ar',
+  background_color:'#f7f7f8',
+  theme_color:'#171717',
   dir:'rtl',
+  lang:'ar',
   icons:[]
  };
 }
