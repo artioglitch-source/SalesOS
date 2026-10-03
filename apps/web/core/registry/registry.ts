@@ -1,4 +1,4 @@
 import type {ModuleManifest} from './types';
-import {moduleCatalog} from '../../../../modules/catalog';
+import {generatedModuleCatalog} from './generated';
 
-export function getModuleManifests():ModuleManifest[]{return moduleCatalog;}
+export function getModuleManifests():ModuleManifest[]{return generatedModuleCatalog;}
