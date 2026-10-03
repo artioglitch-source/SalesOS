@@ -3,19 +3,14 @@ import {createClient} from '@/lib/supabase/server';
 
 export class LocalSalesOSProvider implements AIProvider{
  readonly id='local';
-
  async answer(question:string,context:AIRequestContext):Promise<AIAnswer>{
-  const supabase=await createClient();const q=question.toLowerCase();const ar=context.locale==='ar';
-  const link=(label:string,href:string)=>[{label,href}];
-
+  const supabase=createClient() as any;const q=question.toLowerCase();const ar=context.locale==='ar';const link=(label:string,href:string)=>[{label,href}];
   if(q.includes('revenue')||q.includes('sales')||q.includes('مبيعات')||q.includes('إيراد')){
-   const {data}=await supabase.from('payments').select('amount').eq('org_id',context.orgId).eq('status','received');
-   const total=(data??[]).reduce((n,r)=>n+Number(r.amount||0),0);
+   const {data}=await supabase.from('payments').select('amount').eq('org_id',context.orgId).eq('status','received');const total=(data??[]).reduce((n:number,r:any)=>n+Number(r.amount||0),0);
    return {provider:'local',text:(ar?'إجمالي المدفوعات المستلمة: ':'Total payments received: ')+total.toLocaleString()+' EGP',links:link(ar?'التحصيل':'Collections','/collections'),data:{total}};
   }
   if(q.includes('pipeline')||q.includes('deal')||q.includes('صفق')||q.includes('فرص')){
-   const {data}=await supabase.from('deals').select('title,value,status,stage_id').eq('org_id',context.orgId).eq('status','open').order('value',{ascending:false}).limit(10);
-   const total=(data??[]).reduce((n,r)=>n+Number(r.value||0),0);
+   const {data}=await supabase.from('deals').select('title,value,status,stage_id').eq('org_id',context.orgId).eq('status','open').order('value',{ascending:false}).limit(10);const total=(data??[]).reduce((n:number,r:any)=>n+Number(r.value||0),0);
    return {provider:'local',text:(ar?'قيمة الـPipeline المفتوح: ':'Open pipeline value: ')+total.toLocaleString()+' EGP',links:link(ar?'خط المبيعات':'Pipeline','/pipeline'),data:{total,deals:data??[]}};
   }
   if(q.includes('forecast')||q.includes('run rate')||q.includes('توقع')||q.includes('تنبؤ')){
@@ -25,9 +20,7 @@ export class LocalSalesOSProvider implements AIProvider{
    return {provider:'local',text:(ar?'آخر مبيعات شهرية مسجلة: ':'Latest monthly sales recorded: ')+(trend?.[0]?Number(trend[0].sales).toLocaleString()+' EGP':'0 EGP'),links:link(ar?'التقارير':'Reports','/reports'),data:trend??[]};
   }
   if(q.includes('collection')||q.includes('aging')||q.includes('تحصيل')||q.includes('مديون')||q.includes('ذمم')){
-   const {data}=await supabase.from('v_receivables_aging').select('aging_bucket,balance_due').eq('org_id',context.orgId);
-   const total=(data??[]).reduce((n,r)=>n+Number(r.balance_due||0),0);
-   const overdue=(data??[]).filter(r=>['1_30','31_60','61_90','90_plus'].includes(r.aging_bucket)).reduce((n,r)=>n+Number(r.balance_due||0),0);
+   const {data}=await supabase.from('v_receivables_aging').select('aging_bucket,balance_due').eq('org_id',context.orgId);const total=(data??[]).reduce((n:number,r:any)=>n+Number(r.balance_due||0),0);const overdue=(data??[]).filter((r:any)=>['1_30','31_60','61_90','90_plus'].includes(r.aging_bucket)).reduce((n:number,r:any)=>n+Number(r.balance_due||0),0);
    return {provider:'local',text:(ar?'إجمالي الذمم: ':'Total receivables: ')+total.toLocaleString()+' EGP. '+(ar?'المتأخر: ':'Overdue: ')+overdue.toLocaleString()+' EGP',links:link(ar?'التحصيل':'Collections','/collections'),data:{total,overdue}};
   }
   if(q.includes('inactive')||q.includes('خامل')||q.includes('توقف')){
@@ -48,15 +41,12 @@ export class LocalSalesOSProvider implements AIProvider{
   }
   if(q.includes('target')||q.includes('goal')||q.includes('هدف')){
    const {data}=await supabase.from('targets').select('scope,metric,value,period').eq('org_id',context.orgId).order('period',{ascending:false}).limit(20);
-   const total=(data??[]).filter(r=>r.metric==='sales').reduce((n,r)=>n+Number(r.value||0),0);
+   const total=(data??[]).filter((r:any)=>r.metric==='sales').reduce((n:number,r:any)=>n+Number(r.value||0),0);
    return {provider:'local',text:(ar?'قيمة أهداف المبيعات الحالية المسجلة: ':'Current recorded sales target total: ')+total.toLocaleString()+' EGP',links:link(ar?'الأهداف':'Targets','/targets'),data:data??[]};
   }
-  if(q.includes('coach')||q.includes('coaching')||q.includes('coach me')||q.includes('نصح')||q.includes('طور')){
+  if(q.includes('coach')||q.includes('coaching')||q.includes('نصح')||q.includes('طور')){
    const {data}=await supabase.from('v_my_rep_snapshot').select('*').eq('org_id',context.orgId).maybeSingle();
-   if(data){
-    const action=Number(data.achievement||0)<.8?(ar?'ركز اليوم على إغلاق الفرص الأعلى قيمة وزيادة النشاط.':'Focus today on closing the highest-value opportunities and increasing activity.'):Number(data.achievement||0)<1?(ar?'أنت على المسار؛ ركز على التحصيل والفرص القابلة للإغلاق.':'You are on track; focus on collections and closeable opportunities.'):ar?'استهدف توسيع العملاء والبيع المتقاطع.':'Focus on account expansion and cross-sell.';
-    return {provider:'local',text:action,links:link(ar?'موجز اليوم':'Daily brief','/brief'),data};
-   }
+   if(data){const achievement=Number(data.achievement||0);const action=achievement<.8?(ar?'ركز اليوم على إغلاق الفرص الأعلى قيمة وزيادة النشاط.':'Focus today on closing the highest-value opportunities and increasing activity.'):achievement<1?(ar?'أنت على المسار؛ ركز على التحصيل والفرص القابلة للإغلاق.':'You are on track; focus on collections and closeable opportunities.'):ar?'استهدف توسيع العملاء والبيع المتقاطع.':'Focus on account expansion and cross-sell.';return {provider:'local',text:action,links:link(ar?'موجز اليوم':'Daily brief','/brief'),data};}
   }
   return {provider:'local',text:ar?'المساعد المجاني يعمل مباشرة على بيانات مؤسستك. جرّب: المبيعات، الـPipeline، التوقع، التحصيل، العملاء الخاملين، البيع المتقاطع، الأهداف، أو coaching.':'The free assistant works directly from your organization data. Try: sales, pipeline, forecast, collections, inactive customers, cross-sell, targets, or coaching.',links:link(ar?'لوحة التحكم':'Dashboard','/')};
  }
