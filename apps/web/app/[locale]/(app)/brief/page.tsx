@@ -1,0 +1,20 @@
+'use client';
+
+import {useEffect,useMemo,useState} from 'react';
+import {AlertTriangle,BriefcaseBusiness,Coins,RefreshCw,Users} from 'lucide-react';
+import {createClient} from '@/lib/supabase/browser';
+import {useOrg} from '@/lib/org/context';
+
+export default function DailyBrief(){
+ const path=typeof window!=='undefined'?window.location.pathname:'/ar/brief';const locale=path.split('/')[1]||'ar';const ar=locale!=='en';const s=useMemo(()=>createClient(),[]);const {activeOrgId,userId}=useOrg();const [brief,setBrief]=useState<any>(null);const [busy,setBusy]=useState(false);
+ const load=async()=>{if(!activeOrgId)return;setBusy(true);const [p,d,a,l,t,al]=await Promise.all([
+   s.from('payments').select('amount').eq('org_id',activeOrgId).eq('status','received'),
+   s.from('deals').select('value,status,title').eq('org_id',activeOrgId).eq('status','open').order('value',{ascending:false}).limit(5),
+   s.from('accounts').select('*',{count:'exact',head:true}).eq('org_id',activeOrgId),
+   s.from('leads').select('*',{count:'exact',head:true}).eq('org_id',activeOrgId),
+   s.from('tasks').select('*',{count:'exact',head:true}).eq('org_id',activeOrgId).neq('status','done'),
+   s.from('alerts').select('title,severity').eq('org_id',activeOrgId).neq('status','resolved').order('created_at',{ascending:false}).limit(5)
+ ]);const revenue=(p.data??[]).reduce((n,r)=>n+Number(r.amount||0),0);const pipeline=(d.data??[]).reduce((n,r)=>n+Number(r.value||0),0);const content={revenue,pipeline,accounts:a.count??0,leads:l.count??0,openTasks:t.count??0,topDeals:d.data??[],alerts:al.data??[],generatedAt:new Date().toISOString()};setBrief(content);if(userId)await s.from('daily_briefs').upsert({org_id:activeOrgId,user_id:userId,brief_date:new Date().toISOString().slice(0,10),content});setBusy(false)};
+ useEffect(()=>{load()},[activeOrgId,userId]);
+ return <section className="p-4 md:p-8"><div className="flex flex-wrap items-center justify-between gap-3"><div><h1 className="text-2xl font-semibold">{ar?'ملخص اليوم':'Daily brief'}</h1><p className="mt-1 text-sm text-neutral-500">{ar?'ملخص مجاني مولد من بياناتك الحالية.':'Free brief generated from your live workspace data.'}</p></div><button onClick={load} disabled={busy} className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm"><RefreshCw className="size-4"/>{ar?'تحديث':'Refresh'}</button></div>{brief&&<div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">{[[Coins,ar?'المبيعات المستلمة':'Received',brief.revenue],[BriefcaseBusiness,ar?'الـPipeline':'Pipeline',brief.pipeline],[Users,ar?'الحسابات':'Accounts',brief.accounts],[AlertTriangle,ar?'التنبيهات':'Open alerts',brief.alerts.length]].map(([I,l,v])=><div key={l} className="rounded-2xl border bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"><I className="size-5 text-neutral-500"/><div className="mt-4 text-sm text-neutral-500">{l}</div><div className="mt-1 text-2xl font-semibold">{Number(v).toLocaleString()}{(l==='Received'||l==='Pipeline'||l==='المبيعات المستلمة'||l==='الـPipeline')?' EGP':''}</div></div>)}</div>}{brief&&<div className="mt-4 grid gap-4 lg:grid-cols-2"><div className="rounded-2xl border bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"><h2 className="font-semibold">{ar?'أهم الصفقات':'Top opportunities'}</h2><div className="mt-3 space-y-2">{brief.topDeals.map((d:any)=><div key={d.title} className="flex justify-between rounded-xl border p-3 text-sm"><span>{d.title}</span><span className="font-semibold">{Number(d.value||0).toLocaleString()} EGP</span></div>)}</div></div><div className="rounded-2xl border bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"><h2 className="font-semibold">{ar?'المخاطر المفتوحة':'Open risks'}</h2><div className="mt-3 space-y-2">{brief.alerts.map((a:any,i:number)=><div key={i} className="flex justify-between rounded-xl border p-3 text-sm"><span>{a.title}</span><span className="rounded-full border px-2 py-0.5 text-xs">{a.severity}</span></div>)}{brief.alerts.length===0&&<p className="text-sm text-neutral-500">{ar?'لا توجد تنبيهات مفتوحة.':'No open alerts.'}</p>}</div></div></div>}</section>
+}
