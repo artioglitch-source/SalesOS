@@ -18,7 +18,7 @@ export async function POST(request:Request){
  for(const [table,rows] of Object.entries(parsed.data.tables)){
   if(!allow.has(table)||!rows.length)continue;
   const payload=rows.slice(0,5000).map(row=>({...row,org_id:m.org_id}));
-  const {error}=await supabase.from(table).upsert(payload,{onConflict:'id'});
+  const {error}=await (supabase as any).from(table).upsert(payload,{onConflict:'id'});
   if(error)return NextResponse.json({error:'Restore failed for '+table+': '+error.message},{status:400});
   count+=payload.length;
  }
