@@ -1,0 +1,3 @@
+import {CrudPage,CrudConfig} from '@/components/data/crud-page';
+const config:CrudConfig={table:'activities',title:'Activities',arTitle:'الزيارات والأنشطة',fields:[{key:'type',label:'Type',required:true},{key:'subject',label:'Subject',required:true},{key:'body',label:'Notes'},{key:'scheduled_at',label:'When',type:'datetime'},{key:'completed_at',label:'Completed',type:'datetime'}],columns:[{key:'type',label:'Type'},{key:'subject',label:'Subject'},{key:'scheduled_at',label:'When'},{key:'completed_at',label:'Completed'}]};
+export default async function Activities({params}:{params:Promise<{locale:string}>}){const {locale}=await params;return <CrudPage config={config} locale={locale==='en'?'en':'ar'}/>;}
