@@ -1,0 +1,2 @@
+import {ExtensionBuilder} from '@/components/platform/extension-builder';
+export default async function Builder({params}:{params:Promise<{locale:string}>}){const {locale}=await params;return <ExtensionBuilder locale={locale==='en'?'en':'ar'}/>}

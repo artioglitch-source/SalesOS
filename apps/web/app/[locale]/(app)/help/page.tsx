@@ -1,2 +1,0 @@
-import {HelpCenter} from '@/components/help/help-center';
-export default async function HelpPage({params}:{params:Promise<{locale:string}>}){const {locale}=await params;return <HelpCenter locale={locale==='en'?'en':'ar'}/>}

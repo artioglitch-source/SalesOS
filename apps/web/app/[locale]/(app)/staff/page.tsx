@@ -1,2 +1,0 @@
-import {StaffHub} from '@/components/platform/staff-hub';
-export default async function StaffPage({params}:{params:Promise<{locale:string}>}){const {locale}=await params;return <StaffHub locale={locale==='en'?'en':'ar'}/>}

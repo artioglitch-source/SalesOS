@@ -1,23 +1,7 @@
 'use client';
-
 import {useEffect,useState} from 'react';
-
-export function ThemeProvider({children}:{children:React.ReactNode}) {
-  const [theme,setTheme] = useState<'light'|'dark'>('light');
-  useEffect(() => {
-    const stored = localStorage.getItem('salesos-theme') as 'light'|'dark'|null;
-    const next = stored ?? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    setTheme(next);
-    document.documentElement.classList.toggle('dark',next === 'dark');
-  },[]);
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark',theme === 'dark');
-  },[theme]);
-  return <>{children}</>;
-}
-
-export function toggleTheme() {
-  const next = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
-  localStorage.setItem('salesos-theme',next);
-  document.documentElement.classList.toggle('dark',next === 'dark');
-}
+export const THEME_STYLES=['graphite','ocean','emerald','sand','royal','rose'] as const;
+export type ThemeStyle=typeof THEME_STYLES[number];
+export function ThemeProvider({children}:{children:React.ReactNode}){const [theme,setTheme]=useState<'light'|'dark'>('light');useEffect(()=>{const stored=localStorage.getItem('salesos-theme') as 'light'|'dark'|null;const next=stored??(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');setTheme(next);document.documentElement.classList.toggle('dark',next==='dark');document.documentElement.dataset.salesosTheme=localStorage.getItem('salesos-theme-style')||'graphite'},[]);useEffect(()=>document.documentElement.classList.toggle('dark',theme==='dark'),[theme]);return <>{children}</>}
+export function toggleTheme(){const next=document.documentElement.classList.contains('dark')?'light':'dark';localStorage.setItem('salesos-theme',next);document.documentElement.classList.toggle('dark',next==='dark')}
+export function setThemeStyle(style:ThemeStyle){localStorage.setItem('salesos-theme-style',style);document.documentElement.dataset.salesosTheme=style}
