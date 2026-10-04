@@ -1,0 +1,14 @@
+import {NextResponse} from 'next/server';
+import {createClient} from '@/lib/supabase/server';
+import {z} from 'zod';
+const schema=z.object({idea:z.string().min(3).max(2000),locale:z.enum(['ar','en']).default('ar')});
+const starters=[
+ {match:/theme|style|ثيم|نمط/i,kind:'theme',manifest:{kind:'theme',slot:'app-shell',style:'ocean'}},
+ {match:/metric|kpi|مؤشر|بطاق/i,kind:'metric',manifest:{kind:'metric',slot:'dashboard',source:'v_monthly_trend',metric:'sales'}},
+ {match:/shortcut|button|اختصار|زر/i,kind:'shortcut',manifest:{kind:'shortcut',slot:'quick-add',label:'New shortcut',href:'/reports'}},
+ {match:/automat|notify|تنبيه|أتمت/i,kind:'automation',manifest:{kind:'automation',trigger:'invoice.overdue',actions:[{type:'notify'}]}}
+];
+function readText(data:any){if(typeof data.output_text==='string')return data.output_text;for(const item of data.output||[]){for(const part of item.content||[]){if(part.type==='output_text'&&part.text)return String(part.text)}}return ''}
+function parseJson(text:string){const a=text.indexOf('{'),b=text.lastIndexOf('}');if(a<0||b<a)throw new Error('invalid json');return JSON.parse(text.slice(a,b+1))}
+export async function POST(req:Request){const parsed=schema.safeParse(await req.json());if(!parsed.success)return NextResponse.json({error:'Idea is required'},{status:400});const s=await createClient();const {data:{user}}=await s.auth.getUser();if(!user)return NextResponse.json({error:'Unauthorized'},{status:401});const {data:m}=await s.from('org_members').select('org_id,role').eq('user_id',user.id).eq('status','active').limit(1).maybeSingle();if(!m||!['owner_admin','sales_manager'].includes(m.role))return NextResponse.json({error:'Manager permission required'},{status:403});const key=process.env.AI_API_KEY,model=process.env.AI_MODEL,base=(process.env.AI_BASE_URL||'https://api.openai.com/v1').replace(/\/$/,'');if(key&&model){try{const instructions='Create one safe SalesOS extension manifest as JSON only. Do not include JavaScript, HTML, executable commands, or external URLs. Allowed keys: kind, slot, style, source, metric, trigger, actions, label, href, columns, filters.';const resp=await fetch(base+'/responses',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+key},body:JSON.stringify({model,instructions,input:parsed.data.idea,max_output_tokens:800})});if(!resp.ok)throw new Error('provider');const data=await resp.json();return NextResponse.json({mode:'real',name:'AI extension',manifest:parseJson(readText(data))})}catch{}}
+const starter=starters.find(x=>x.match.test(parsed.data.idea))||starters[3];return NextResponse.json({mode:'local',name:'SalesOS '+starter.kind+' extension',manifest:{...starter.manifest,description:parsed.data.idea,generated:'local'}})}
