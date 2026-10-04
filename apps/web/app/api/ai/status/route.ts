@@ -1,0 +1,3 @@
+import {NextResponse} from 'next/server';
+import {createClient} from '@/lib/supabase/server';
+export async function GET(){const s=await createClient();const {data:{user}}=await s.auth.getUser();if(!user)return NextResponse.json({configured:false},{status:401});const {data:m}=await s.from('org_members').select('role').eq('user_id',user.id).eq('status','active').limit(1).maybeSingle();if(!m)return NextResponse.json({configured:false},{status:403});return NextResponse.json({configured:Boolean(process.env.AI_API_KEY&&process.env.AI_MODEL),provider:process.env.AI_BASE_URL?'OpenAI-compatible':'OpenAI',model:process.env.AI_MODEL||null})}
