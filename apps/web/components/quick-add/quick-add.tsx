@@ -1,5 +1,14 @@
 'use client';
 import Link from 'next/link';
 import {useState} from 'react';
-import {Plus,X,Receipt,Wallet,MapPin,FileText,Building2,UserRoundCheck,CheckSquare,Sparkles} from 'lucide-react';
-export function QuickAdd({locale}:{locale:'ar'|'en'}){const ar=locale==='ar';const [open,setOpen]=useState(false);const items=[['/sales/new',ar?'بيع سريع':'Quick sale',Receipt],['/collections',ar?'تحصيل':'Collection',Wallet],['/activities/new',ar?'زيارة / متابعة':'Visit / follow-up',MapPin],['/pipeline/new',ar?'عرض سعر':'Quote',FileText],['/accounts',ar?'عميل جديد':'New customer',Building2],['/leads',ar?'عميل محتمل':'New lead',UserRoundCheck],['/tasks',ar?'مهمة':'Task',CheckSquare],['/assistant',ar?'اسأل المساعد':'Ask assistant',Sparkles]] as const;return <div className="fixed bottom-20 end-5 z-50 md:bottom-6">{open&&<div className="mb-3 w-64 rounded-2xl border bg-white p-2 shadow-xl dark:border-neutral-800 dark:bg-neutral-900">{items.map(([href,label,Icon])=><Link key={href} onClick={()=>setOpen(false)} href={'/'+locale+href} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800"><span className="rounded-lg border p-2"><Icon className="size-4"/></span>{label}</Link>)}</div>}<button onClick={()=>setOpen(v=>!v)} className="flex size-14 items-center justify-center rounded-full bg-neutral-950 text-white shadow-lg transition hover:scale-105 dark:bg-white dark:text-neutral-950" aria-label={ar?'إضافة سريعة':'Quick add'}>{open?<X className="size-6"/>:<Plus className="size-6"/>}</button></div>}
+import {Plus,X,Receipt,Wallet,MapPin,FileText,Building2,UserRoundCheck,CheckSquare,Sparkles,Users,HelpCircle} from 'lucide-react';
+export function QuickAdd({locale}:{locale:'ar'|'en'}){
+ const ar=locale==='ar';const [open,setOpen]=useState(false);
+ const items=[
+  ['/sales/new',ar?'بيع سريع':'Quick sale',Receipt],['/collections',ar?'تحصيل':'Collection',Wallet],['/activities/new',ar?'زيارة / متابعة':'Visit / follow-up',MapPin],['/pipeline/new',ar?'عرض سعر':'Quote',FileText],['/accounts',ar?'عميل جديد':'New customer',Building2],['/leads',ar?'عميل محتمل':'New lead',UserRoundCheck],['/staff',ar?'موظف / مندوب':'Staff / rep',Users],['/tasks',ar?'مهمة':'Task',CheckSquare],['/assistant',ar?'المساعد الذكي':'AI Copilot',Sparkles],['/help',ar?'دليل الاستخدام':'Help guide',HelpCircle]
+ ] as const;
+ return <div className="fixed bottom-20 end-5 z-50 md:bottom-6">
+  {open&&<div className="mb-3 w-72 rounded-2xl border bg-white p-2 shadow-xl dark:border-neutral-800 dark:bg-neutral-900">{items.map(([href,label,Icon])=><Link key={href} onClick={()=>setOpen(false)} href={'/'+locale+href} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800"><span className="rounded-lg border p-2"><Icon className="size-4"/></span>{label}</Link>)}</div>}
+  <button onClick={()=>setOpen(v=>!v)} className="flex size-14 items-center justify-center rounded-full bg-neutral-950 text-white shadow-lg transition hover:scale-105 dark:bg-white dark:text-neutral-950" aria-label={ar?'إضافة سريعة':'Quick add'}>{open?<X className="size-6"/>:<Plus className="size-6"/>}</button>
+ </div>;
+}
