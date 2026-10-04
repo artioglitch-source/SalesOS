@@ -2,4 +2,8 @@
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 import {Home,Users,Receipt,MoreHorizontal} from 'lucide-react';
-export function MobileNav(){const p=usePathname();const locale=p.split('/')[1]==='en'?'en':'ar';const ar=locale==='ar';const items=[['/',Home,ar?'اليوم':'Today'],['/sales',Receipt,ar?'المبيعات':'Sales'],['/accounts',Users,ar?'العملاء':'Customers'],['/more',MoreHorizontal,ar?'المزيد':'More']] as const;return <nav className="salesos-mobile-nav fixed inset-x-0 bottom-0 z-50 grid grid-cols-4 border-t p-2 backdrop-blur">{items.map(([href,Icon,label])=><Link key={href} href={'/'+locale+href} className={"flex flex-col items-center gap-1 rounded-xl p-2 text-[10px] "+(p===('/'+locale+href)?'salesos-mobile-active':'salesos-muted')}><Icon className="size-5"/>{label}</Link>)}</nav>}
+export function MobileNav(){
+ const p=usePathname();const locale=p.split('/')[1]==='en'?'en':'ar';const ar=locale==='ar';
+ const items=[['/',Home,ar?'اليوم':'Today'],['/sales',Receipt,ar?'المبيعات':'Sales'],['/accounts',Users,ar?'العملاء':'Customers'],['/more',MoreHorizontal,ar?'المزيد':'More']] as const;
+ return <nav className="salesos-mobile-nav fixed inset-x-0 bottom-0 z-50 grid grid-cols-4 border-t p-2 backdrop-blur lg:hidden">{items.map(([href,Icon,label])=><Link key={href} href={'/'+locale+href} className={"flex flex-col items-center gap-1 rounded-xl p-2 text-[10px] "+(p===('/'+locale+href)?'salesos-mobile-active':'salesos-muted')}><Icon className="size-5"/>{label}</Link>)}</nav>;
+}
