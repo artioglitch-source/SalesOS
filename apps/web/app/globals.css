@@ -22,6 +22,7 @@ html[data-salesos-theme="ocean"]{--accent:#0284c7}html[data-salesos-theme="emera
 .salesos-muted{color:color-mix(in srgb,var(--foreground) 48%,transparent)}
 .salesos-divider{border-color:color-mix(in srgb,var(--foreground) 10%,transparent)}
 .salesos-tool-btn,.salesos-profile,.salesos-workspace-select,.salesos-search{border-color:color-mix(in srgb,var(--foreground) 12%,transparent)}
+.salesos-ai-search-button{background:var(--foreground);color:var(--background);box-shadow:0 1px 0 #ffffff22 inset}
 .salesos-ai-wrap{width:min(720px,calc(100vw - 16px))}
 .salesos-ai-dock{display:flex;align-items:center;gap:10px;min-height:48px;padding:6px 8px;border-radius:999px;background:color-mix(in srgb,#111 92%,var(--accent));color:#fff;border-color:#ffffff22;backdrop-filter:blur(18px);transform-origin:top center;transition:width .2s ease,box-shadow .2s ease}
 .salesos-ai-dock:not(.is-open){width:min(400px,calc(100vw - 16px))}
