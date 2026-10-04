@@ -12,17 +12,25 @@ export async function proxy(request:NextRequest){
       cookiesToSet.forEach(({name,value,options})=>response.cookies.set(name,value,options));
     },
   }});
-  await supabase.auth.getUser();
   const pathname=request.nextUrl.pathname;
-  if(pathname==='/'||pathname==='')return NextResponse.redirect(new URL('/ar',request.url));
-  if(!/^\/(ar|en)(\/|$)/.test(pathname))return NextResponse.redirect(new URL('/ar'+(pathname==='/'?'':pathname),request.url));
 
-  // Legacy compatibility for links produced by an older build.
-  const broken=pathname.match(/^\/(ar|en)\/undefined(?:\/(.*))?$/);
-  if(broken){
-    const rest=broken[2]?'/'+broken[2]:'';
-    return NextResponse.redirect(new URL('/'+broken[1]+rest,request.url));
+  // API routes are already server-routed and must never be localized.
+  if(pathname.startsWith('/api/')) return response;
+
+  await supabase.auth.getUser();
+
+  if(pathname==='/'||pathname==='')return NextResponse.redirect(new URL('/ar',request.url));
+
+  // Backward compatibility for the broken generated link /ar/undefined/...
+  const legacy=pathname.match(/^\/(ar|en)\/undefined(?:\/(.*))?$/);
+  if(legacy){
+    return NextResponse.redirect(new URL('/'+legacy[1]+(legacy[2]?'/'+legacy[2]:''),request.url));
   }
+
+  if(!/^\/(ar|en)(\/|$)/.test(pathname)){
+    return NextResponse.redirect(new URL('/ar'+(pathname==='/'?'':pathname),request.url));
+  }
+
   return response;
 }
 

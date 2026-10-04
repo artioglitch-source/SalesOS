@@ -17,10 +17,9 @@ async function readRequest(req:Request){
     let total=0;
     for(const file of files.slice(0,6)){
       if(file.size<=0)continue;
+      if(total+file.size>4*1024*1024)break;
       total+=file.size;
-      if(total>4*1024*1024)break;
-      const bytes=Buffer.from(await file.arrayBuffer());
-      attachments.push({name:file.name,mimeType:file.type||'application/octet-stream',data:bytes.toString('base64')});
+      attachments.push({name:file.name,mimeType:file.type||'application/octet-stream',data:Buffer.from(await file.arrayBuffer()).toString('base64')});
     }
     return {question,locale,attachments};
   }
@@ -28,30 +27,34 @@ async function readRequest(req:Request){
 }
 
 export async function POST(req:Request){
- try{
-  const body=await readRequest(req);
-  const parsed=schema.safeParse({question:body.question,locale:body.locale});
-  if(!parsed.success)return NextResponse.json({error:'A question is required.'},{status:400});
-  const s=await createClient();
-  const {data:{user}}=await s.auth.getUser();
-  if(!user)return NextResponse.json({error:'Unauthorized'},{status:401});
-  const {data:m}=await s.from('org_members').select('org_id,role').eq('user_id',user.id).eq('status','active').limit(1).maybeSingle();
-  if(!m)return NextResponse.json({error:'Organization required'},{status:400});
-  let answer:any;let mode:'real'|'local'='local';
-  if(process.env.GEMINI_API_KEY){
-    try{
-      answer=await new GeminiSalesOSProvider().answer(parsed.data.question,{locale:parsed.data.locale,orgId:m.org_id,userId:user.id,attachments:body.attachments});
-      mode='real';
-    }catch(error){
+  try{
+    const body=await readRequest(req);
+    const parsed=schema.safeParse({question:body.question,locale:body.locale});
+    if(!parsed.success)return NextResponse.json({error:'A question is required.'},{status:400});
+
+    const s=await createClient();
+    const {data:{user}}=await s.auth.getUser();
+    if(!user)return NextResponse.json({error:'Unauthorized'},{status:401});
+
+    const {data:m}=await s.from('org_members').select('org_id').eq('user_id',user.id).eq('status','active').limit(1).maybeSingle();
+    if(!m)return NextResponse.json({error:'Organization required'},{status:400});
+
+    let answer:any;let mode:'real'|'local'='local';
+    if(process.env.GEMINI_API_KEY||process.env.GOOGLE_API_KEY){
+      try{
+        answer=await new GeminiSalesOSProvider().answer(parsed.data.question,{locale:parsed.data.locale,orgId:m.org_id,userId:user.id,attachments:body.attachments});
+        mode='real';
+      }catch(error){
+        answer=await new LocalSalesOSProvider().answer(parsed.data.question,{locale:parsed.data.locale,orgId:m.org_id,userId:user.id});
+        const reason=error instanceof Error?error.message:'provider error';
+        answer.text=(parsed.data.locale==='ar'?'تعذر الوصول إلى Gemini، فتم استخدام الوضع المحلي المجاني. السبب: ':'Gemini was unavailable, so the free local mode answered. Reason: ')+reason+'\n\n'+answer.text;
+      }
+    }else{
       answer=await new LocalSalesOSProvider().answer(parsed.data.question,{locale:parsed.data.locale,orgId:m.org_id,userId:user.id});
-      answer.text=(parsed.data.locale==='ar'?'تعذر الوصول إلى Gemini وتم استخدام الوضع المحلي المجاني. السبب: ':'Gemini was unavailable, so the free local mode answered. Reason: ')+(error instanceof Error?error.message:'provider error')+'\n\n'+answer.text;
     }
-  }else{
-    answer=await new LocalSalesOSProvider().answer(parsed.data.question,{locale:parsed.data.locale,orgId:m.org_id,userId:user.id});
+    await s.from('ai_usage').insert({org_id:m.org_id,user_id:user.id,provider:answer.provider,model:mode==='real'?(process.env.GEMINI_MODEL||'gemini-3.8-flash'):'deterministic',tool_calls:1});
+    return NextResponse.json({...answer,mode});
+  }catch(error){
+    return NextResponse.json({error:error instanceof Error?error.message:'Assistant request failed'},{status:500});
   }
-  await s.from('ai_usage').insert({org_id:m.org_id,user_id:user.id,provider:answer.provider,model:mode==='real'?(process.env.GEMINI_MODEL||'gemini-3.8-flash'):'deterministic',tool_calls:1});
-  return NextResponse.json({...answer,mode});
- }catch(error){
-  return NextResponse.json({error:error instanceof Error?error.message:'Assistant request failed'},{status:500});
- }
 }
