@@ -75,7 +75,7 @@ export async function POST(req:Request){
   for(const file of files){
    if(file.size>15*1024*1024)continue;
    const part=await toGeminiPart(file);
-   if(part.type==='text')textParts.push(part.text);
+   if('text' in part)textParts.push(String(part.text||''));
    else input.push(part);
   }
   if(textParts.length)input.unshift({type:'text',text:'Attached tabular/text data:\n'+textParts.join('\n\n')});
