@@ -9,6 +9,11 @@ import {useOrg} from '@/lib/org/context';
 import {NotificationBell} from '@/components/notifications/notification-bell';
 import {SolidAiDock} from '@/components/solid-ai-dock';
 
+function roleLabel(role:string|null,ar:boolean){
+ const map:any={owner_admin:ar?'المالك / المدير':'Owner / Manager',sales_manager:ar?'مدير المبيعات':'Sales Manager',supervisor:ar?'مشرف':'Supervisor',sales_rep:ar?'مندوب مبيعات':'Sales Rep',accountant_hr:ar?'محاسبة / موارد بشرية':'Accountant / HR',viewer:ar?'مشاهد':'Viewer'};
+ return map[role||'']||'';
+}
+
 export function TopBar(){
  const path=usePathname();const router=useRouter();const locale=path.split('/')[1]==='en'?'en':'ar';const ar=locale==='ar';
  const {organizations,activeOrgId,setActiveOrgId,role,userId}=useOrg();const [profile,setProfile]=useState<any>(null);
@@ -16,12 +21,12 @@ export function TopBar(){
  const logout=async()=>{await createClient().auth.signOut();router.push('/'+locale+'/login');router.refresh()};
  useEffect(()=>{if(!userId)return;createClient().from('profiles').select('full_name,avatar_url').eq('id',userId).maybeSingle().then(({data})=>setProfile(data))},[userId]);
  return <header className="salesos-topbar sticky top-0 z-40 border-b backdrop-blur-xl"><div className="flex h-14 items-center gap-2 px-3 md:h-16 md:px-7">
-  <button onClick={openSearch} className="hidden min-w-0 flex-1 items-center gap-3 rounded-xl border bg-black/[.02] px-3 py-2.5 text-start text-sm text-neutral-400 md:flex dark:bg-white/[.02]"><span>{ar?'ابحث أو انتقل أو اكتب أمراً...':'Search, navigate, or command...'}</span><kbd className="ms-auto rounded-lg border px-2 py-1 text-[10px]"><Command className="inline size-3 me-1"/>K</kbd></button>
+  <button onClick={openSearch} className="hidden min-w-0 flex-1 items-center gap-3 rounded-xl border bg-black/[.02] px-3 py-2.5 text-start text-sm text-neutral-400 md:flex dark:bg-white/[.02]" aria-label={ar?'البحث والتنقل':'Search and navigation'}><span>{ar?'ابحث أو انتقل أو اكتب أمراً...':'Search, navigate, or command...'}</span><kbd className="ms-auto rounded-lg border px-2 py-1 text-[10px]"><Command className="inline size-3 me-1"/>K</kbd></button>
   <button onClick={openSearch} className="rounded-xl border p-2.5 md:hidden" aria-label={ar?'بحث':'Search'}>⌕</button>
   <div className="ms-auto flex items-center gap-2">
    <SolidAiDock locale={locale}/>
-   {organizations.length>0&&<select aria-label="workspace" value={activeOrgId||''} onChange={e=>setActiveOrgId(e.target.value)} className="hidden max-w-[170px] rounded-xl border bg-transparent px-3 py-2 text-xs md:block">{organizations.map(o=><option key={o.id} value={o.id}>{o.name}</option>)}</select>}
-   <span className="hidden rounded-full border px-3 py-1.5 text-[11px] font-medium text-neutral-500 lg:inline-flex">{role==='owner_admin'?'Owner / Manager':role==='sales_manager'?'Sales Manager':role==='supervisor'?'Supervisor':role==='sales_rep'?'Sales Rep':role==='accountant_hr'?'Accountant / HR':role==='viewer'?'Viewer':''}</span>
+   {organizations.length>0&&<select aria-label={ar?'مساحة العمل':'Workspace'} value={activeOrgId||''} onChange={e=>setActiveOrgId(e.target.value)} className="hidden max-w-[170px] rounded-xl border bg-transparent px-3 py-2 text-xs md:block">{organizations.map(o=><option key={o.id} value={o.id}>{o.name}</option>)}</select>}
+   <span className="hidden rounded-full border px-3 py-1.5 text-[11px] font-medium text-neutral-500 lg:inline-flex">{roleLabel(role,ar)}</span>
    <Link href={'/'+locale+'/help'} aria-label={ar?'المساعدة':'Help'} className="rounded-xl border p-2.5"><HelpCircle className="size-4"/></Link>
    <NotificationBell locale={locale}/>
    <a href={'/'+(ar?'en':'ar')} className="rounded-xl border px-2.5 py-2 text-[11px]">{ar?'EN':'عربي'}</a>
