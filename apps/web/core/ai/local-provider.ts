@@ -4,7 +4,7 @@ import {createClient} from '@/lib/supabase/server';
 export class LocalSalesOSProvider implements AIProvider{
  readonly id='local';
  async answer(question:string,context:AIRequestContext):Promise<AIAnswer>{
-  const supabase=createClient() as any;const q=question.toLowerCase();const ar=context.locale==='ar';const link=(label:string,href:string)=>[{label,href}];
+  const supabase=await createClient();const q=question.toLowerCase();const ar=context.locale==='ar';const link=(label:string,href:string)=>[{label,href}];
   if(q.includes('revenue')||q.includes('sales')||q.includes('مبيعات')||q.includes('إيراد')){
    const {data}=await supabase.from('payments').select('amount').eq('org_id',context.orgId).eq('status','received');const total=(data??[]).reduce((n:number,r:any)=>n+Number(r.amount||0),0);
    return {provider:'local',text:(ar?'إجمالي المدفوعات المستلمة: ':'Total payments received: ')+total.toLocaleString()+' EGP',links:link(ar?'التحصيل':'Collections','/collections'),data:{total}};
