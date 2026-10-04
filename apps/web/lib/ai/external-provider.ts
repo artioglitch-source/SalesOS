@@ -21,12 +21,13 @@ export class ExternalSalesOSProvider implements AIProvider{
     const isGemini=Boolean(geminiKey);
     const key=geminiKey||genericKey;
     const model=isGemini
-      ? (process.env.GEMINI_MODEL||process.env.AI_MODEL||'gemini-3.6-flash')
+      ? (process.env.GEMINI_MODEL||process.env.AI_MODEL||'gemini-3.8-flash')
       : process.env.AI_MODEL;
-    const base=(isGemini
+    const configuredBase=isGemini
       ? (process.env.GEMINI_BASE_URL||'https://generativelanguage.googleapis.com/v1beta/openai')
-      : (process.env.AI_BASE_URL||'https://api.openai.com/v1')
-    ).replace(/\/$/,'');
+      : (process.env.AI_BASE_URL||'https://api.openai.com/v1');
+    let base=configuredBase.replace(/\/$/,'');
+    if(isGemini&&!base.endsWith('/openai'))base+='/openai';
     if(!key||!model)throw new Error(isGemini?'GEMINI_API_KEY and GEMINI_MODEL are required':'AI_API_KEY and AI_MODEL are required');
 
     const s=await createClient();
